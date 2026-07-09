@@ -255,17 +255,6 @@ main {
 .copy-btn.done .ic-copy { display: none; }
 .copy-btn.done .ic-check { display: block; }
 
-/* ── Presets ────────────────────────────────────────────────────── */
-.presets { display: flex; gap: 6px; flex-shrink: 0; }
-.preset {
-  flex: 1; height: 30px; border-radius: 99px;
-  font-size: 11.5px; font-weight: 500; color: var(--muted);
-  background: var(--panel); border: 1px solid var(--line-soft);
-  transition: color .15s, border-color .15s, background .15s;
-  white-space: nowrap;
-}
-.preset:hover { color: var(--accent); border-color: rgba(252, 91, 2, .45); background: var(--accent-dim); }
-
 footer {
   margin-top: auto;
   padding: 8px 0 9px;
@@ -282,13 +271,12 @@ footer {
 
 /* ── Launch reveal ──────────────────────────────────────────────── */
 @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
-.hero, .row, .presets, footer { animation: rise .45s cubic-bezier(.22, 1, .36, 1) backwards; }
+.hero, .row, footer { animation: rise .45s cubic-bezier(.22, 1, .36, 1) backwards; }
 .row:nth-child(1) { animation-delay: .06s; }
 .row:nth-child(2) { animation-delay: .11s; }
 .row:nth-child(3) { animation-delay: .16s; }
 .row:nth-child(4) { animation-delay: .21s; }
-.presets { animation-delay: .27s; }
-footer  { animation-delay: .32s; }
+footer  { animation-delay: .27s; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

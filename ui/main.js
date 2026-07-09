@@ -22,7 +22,7 @@
     '?ids=bitcoin&vs_currencies=eur,usd&include_24hr_change=true';
   const SPARK_URL =
     'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart' +
-    '?vs_currency=eur&days=1';
+    '?vs_currency=usd&days=1';
 
   /* ── State ─────────────────────────────────────────────────────── */
 
@@ -134,14 +134,14 @@
 
   function renderPrice(animate) {
     if (!P.eur) return;
-    const el = $('priceEur');
+    const el = $('priceUsd');
     el.innerHTML = '';
-    el.append(fmt.eur(P.eur));
+    el.append(fmt.usd(P.usd));
     const cur = document.createElement('span');
     cur.className = 'cur';
-    cur.textContent = '€';
+    cur.textContent = '$';
     el.append(cur);
-    $('priceUsd').textContent = fmt.usd(P.usd) + ' $';
+    $('priceEur').textContent = fmt.eur(P.eur) + ' €';
     if (animate) {
       el.classList.remove('bump');
       void el.offsetWidth;
@@ -247,7 +247,7 @@
       const btc = data.bitcoin;
       P.eur = Number(btc.eur);
       P.usd = Number(btc.usd);
-      P.change24 = Number(btc.eur_24h_change ?? 0);
+      P.change24 = Number(btc.usd_24h_change ?? 0);
       P.ts = Math.floor(Date.now() / 1000);
       offline = false;
       store.set('prices', { eur: P.eur, usd: P.usd, change24: P.change24, ts: P.ts });
@@ -327,16 +327,6 @@
       try { await copyToClipboard(rawValue(key, v)); } catch { return; }
       btn.classList.add('done');
       setTimeout(() => btn.classList.remove('done'), 900);
-    });
-  });
-
-  /* ── Presets ───────────────────────────────────────────────────── */
-
-  document.querySelectorAll('.preset').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      setField('eur', fmt.eur(parseFloat(btn.dataset.eur)));
-      markSource('eur');
-      recompute('eur');
     });
   });
 

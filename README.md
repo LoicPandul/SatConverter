@@ -27,7 +27,7 @@ Grab the latest installer from the [Releases](https://github.com/LoicPandul/SatC
 
 - Type in any field — the three others update instantly
 - Live price, 24h change and sparkline, refreshed every minute
-- One-click copy, quick EUR presets, always-on-top pin
+- One-click copy, always-on-top pin
 - Works offline with the last known price
 - Remembers its window position · single instance
 - Number formats follow your system locale
