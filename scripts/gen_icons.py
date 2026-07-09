@@ -72,6 +72,12 @@ def main() -> None:
     make(logo, 32).save(ICONS / "32x32.png")
     make(logo, 64, radius_pct=0.32).save(REPO / "ui" / "assets" / "logo-64.png")
     make(logo, 512).save(REPO / "assets" / "logo.png")
+
+    # macOS bundle icon (required by the Tauri bundler on mac)
+    make(logo, 1024).save(
+        ICONS / "icon.icns", format="ICNS",
+        append_images=[imgs[s] for s in (16, 32, 64, 128, 256)] + [make(logo, 512)],
+    )
     print("icons regenerated")
 
 

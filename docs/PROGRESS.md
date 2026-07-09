@@ -63,3 +63,12 @@ Development log for the Rust + Tauri port of SatConverter.
 - Auto-refresh 2 min -> 1 min.
 - Simplified README; rounded logo + screenshot.
 - Full E2E regression re-run on release: ALL PASS. Binary 3.24 MB.
+
+## 2026-07-09 — v0.1.0 release pipeline
+
+- Version aligned to 0.1.0 (first public release).
+- GitHub Actions workflow: tauri-action builds NSIS/MSI (Windows), universal .dmg (macOS), AppImage/.deb/.rpm (Linux) on every v* tag and attaches them to a draft GitHub Release.
+- Added icon.icns (required by the macOS bundler); bundle targets set to "all".
+- arboard: wayland-data-control feature for native Linux/Wayland clipboard.
+- macOS builds are unsigned (no Apple Developer account): first launch = right-click -> Open. Documented in README + release notes.
+- Note: only the Windows build is E2E-tested locally; macOS/Linux artifacts come from CI (all components are cross-platform).

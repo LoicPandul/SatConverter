@@ -1,0 +1,60 @@
+# Builds native installers for Windows, macOS and Linux on every `v*` tag,
+# and attaches them to a draft GitHub Release (review, then click Publish).
+#
+#   git tag v0.1.0 && git push origin v0.1.0
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest        # .dmg + .app (universal: Apple Silicon + Intel)
+            args: --target universal-apple-darwin
+          - platform: ubuntu-22.04        # .AppImage + .deb + .rpm
+            args: ''
+          - platform: windows-latest      # NSIS setup.exe + .msi
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'SatConverter ${{ github.ref_name }}'
+          releaseBody: |
+            ### Downloads
+            - **Windows**: `*-setup.exe` (installer) or `.msi`
+            - **macOS**: `.dmg` — unsigned build: on first launch, right-click the app → Open
+            - **Linux**: `.AppImage` (portable, `chmod +x` then run), `.deb` or `.rpm`
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}

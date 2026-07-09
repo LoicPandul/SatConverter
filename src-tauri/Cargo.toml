@@ -1,6 +1,6 @@
 [package]
 name = "satconverter"
-version = "1.0.0"
+version = "0.1.0"
 description = "A lightweight desktop converter for instant sats, BTC, EUR and USD conversions with live Bitcoin prices."
 authors = ["Loïc Morel"]
 license = "Unlicense"
@@ -16,7 +16,9 @@ tauri = { version = "2", features = [] }
 tauri-plugin-single-instance = "2"
 tauri-plugin-window-state = "2"
 tauri-plugin-opener = "2"
-arboard = { version = "3", default-features = false }
+# wayland-data-control : presse-papiers natif Wayland sur Linux (X11 inclus de base) ;
+# default-features off pour exclure image-data (copie de texte uniquement).
+arboard = { version = "3", default-features = false, features = ["wayland-data-control"] }
 
 # Smallest, fastest possible release binary.
 [profile.release]
