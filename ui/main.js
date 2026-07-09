@@ -381,6 +381,7 @@
     renderPrice(false);
     renderSpark();
     renderStatus();
+    afterPrices(); // cached prices are enough for the worked example
 
     P.pin = !!store.get('pin');
     $('pinBtn').classList.toggle('active', P.pin);
