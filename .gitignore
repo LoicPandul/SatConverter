@@ -20,3 +20,6 @@ desktop.ini
 # Local artifacts
 *.log
 dist/
+
+# Journal de travail local (jamais versionne)
+.local/

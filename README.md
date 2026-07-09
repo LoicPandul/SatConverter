@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="SatConverter screenshot" width="380">
+  <img src="assets/screenshot.png" alt="SatConverter screenshot" width="380">
 </p>
 
 ## Download
