@@ -1,0 +1,22 @@
+# Rust / Tauri
+/src-tauri/target/
+/src-tauri/gen/schemas/
+
+# Claude Code — local only
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+*.claude.json
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Local artifacts
+*.log
+dist/

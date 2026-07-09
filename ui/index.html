@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SatConverter</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="titlebar">
+    <div class="drag" data-tauri-drag-region>
+      <img class="brand-mark" src="assets/logo-64.png" alt="" width="22" height="22">
+      <span class="brand-name">Sat<b>Converter</b></span>
+    </div>
+    <div class="win-controls">
+      <button id="pinBtn" class="win-btn pin" aria-label="Always on top" title="Always on top">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></svg>
+      </button>
+      <button id="minBtn" class="win-btn" aria-label="Minimize" title="Minimize">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button id="closeBtn" class="win-btn close" aria-label="Close" title="Close">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero card" aria-label="Live Bitcoin price">
+      <div class="hero-top">
+        <span class="hero-label">1 Bitcoin</span>
+        <span id="chip24" class="chip">— / 24h</span>
+      </div>
+      <div id="priceEur" class="hero-price">—<span class="cur">€</span></div>
+      <div id="priceUsd" class="hero-sub">—</div>
+      <div class="spark-wrap">
+        <svg id="spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FC5B02" stop-opacity=".22"/>
+              <stop offset="100%" stop-color="#FC5B02" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="sparkArea" fill="url(#sparkFill)" d=""/>
+          <path id="sparkLine" fill="none" stroke="#FC5B02" stroke-width="1.1"
+                vector-effect="non-scaling-stroke" stroke-linejoin="round" d=""/>
+        </svg>
+      </div>
+      <div class="hero-status">
+        <span id="dot" class="dot"></span>
+        <span id="statusTxt" aria-live="polite">loading…</span>
+        <button id="refreshBtn" class="refresh-btn" aria-label="Refresh prices" title="Refresh (Ctrl+R)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        </button>
+      </div>
+      <div id="prog" class="prog"></div>
+    </section>
+
+    <section class="rows" aria-label="Converter">
+      <div class="row" data-key="sats">
+        <div class="unit-stack"><label class="unit" for="in-sats">Sats</label><span class="unit-sub">satoshi</span></div>
+        <input id="in-sats" data-key="sats" type="text" inputmode="decimal" placeholder="0"
+               autocomplete="off" spellcheck="false" aria-label="Amount in satoshis">
+        <button class="copy-btn" data-key="sats" aria-label="Copy sats amount" title="Copy">
+          <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+      </div>
+      <div class="row" data-key="btc">
+        <div class="unit-stack"><label class="unit" for="in-btc">BTC</label><span class="unit-sub">bitcoin</span></div>
+        <input id="in-btc" data-key="btc" type="text" inputmode="decimal" placeholder="0"
+               autocomplete="off" spellcheck="false" aria-label="Amount in bitcoin">
+        <button class="copy-btn" data-key="btc" aria-label="Copy BTC amount" title="Copy">
+          <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+      </div>
+      <div class="row" data-key="eur">
+        <div class="unit-stack"><label class="unit" for="in-eur">EUR</label><span class="unit-sub">euro</span></div>
+        <input id="in-eur" data-key="eur" type="text" inputmode="decimal" placeholder="0"
+               autocomplete="off" spellcheck="false" aria-label="Amount in euros" autofocus>
+        <button class="copy-btn" data-key="eur" aria-label="Copy EUR amount" title="Copy">
+          <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+      </div>
+      <div class="row" data-key="usd">
+        <div class="unit-stack"><label class="unit" for="in-usd">USD</label><span class="unit-sub">dollar</span></div>
+        <input id="in-usd" data-key="usd" type="text" inputmode="decimal" placeholder="0"
+               autocomplete="off" spellcheck="false" aria-label="Amount in US dollars">
+        <button class="copy-btn" data-key="usd" aria-label="Copy USD amount" title="Copy">
+          <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="presets" aria-label="Quick EUR amounts">
+      <button class="preset" data-eur="10">10 €</button>
+      <button class="preset" data-eur="50">50 €</button>
+      <button class="preset" data-eur="100">100 €</button>
+      <button class="preset" data-eur="500">500 €</button>
+      <button class="preset" data-eur="1000">1 000 €</button>
+    </section>
+
+    <footer>CoinGecko data · auto-refresh every 2 min</footer>
+  </main>
+
+<script src="main.js" defer></script>
+</body>
+</html>
