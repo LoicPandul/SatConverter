@@ -212,13 +212,7 @@ main {
   position: relative;
   transition: border-color .2s, background .2s;
 }
-.row::before {
-  content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px;
-  border-radius: 0 3px 3px 0; background: rgba(233, 231, 226, .85);
-  opacity: 0; transition: opacity .2s;
-}
 .row:focus-within { border-color: #2C313D; background: var(--panel-2); }
-.row.source::before { opacity: 1; }
 /* Bitcoin units carry the brand accent; fiat stays neutral. */
 .row[data-key="sats"] .unit, .row[data-key="btc"] .unit { color: var(--accent); }
 
