@@ -62,6 +62,7 @@
         <div class="unit-stack"><label class="unit" for="in-sats">Sats</label><span class="unit-sub">satoshi</span></div>
         <input id="in-sats" data-key="sats" type="text" inputmode="decimal" placeholder="0"
                autocomplete="off" spellcheck="false" aria-label="Amount in satoshis">
+        <span class="suffix" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="3" x2="12" y2="6.2"/><line x1="12" y1="17.8" x2="12" y2="21"/><line x1="6.5" y1="9" x2="17.5" y2="9"/><line x1="6.5" y1="12" x2="17.5" y2="12"/><line x1="6.5" y1="15" x2="17.5" y2="15"/></svg></span>
         <button class="copy-btn" data-key="sats" aria-label="Copy sats amount" title="Copy">
           <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
@@ -71,6 +72,7 @@
         <div class="unit-stack"><label class="unit" for="in-btc">BTC</label><span class="unit-sub">bitcoin</span></div>
         <input id="in-btc" data-key="btc" type="text" inputmode="decimal" placeholder="0"
                autocomplete="off" spellcheck="false" aria-label="Amount in bitcoin">
+        <span class="suffix" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6v12"/><path d="M9 6h4.5a2.8 2.8 0 0 1 0 5.6H9"/><path d="M9 11.6h5a2.9 2.9 0 0 1 0 5.8H9"/><line x1="10.4" y1="3.4" x2="10.4" y2="6"/><line x1="13.4" y1="3.4" x2="13.4" y2="6"/><line x1="10.4" y1="18" x2="10.4" y2="20.6"/><line x1="13.4" y1="18" x2="13.4" y2="20.6"/></svg></span>
         <button class="copy-btn" data-key="btc" aria-label="Copy BTC amount" title="Copy">
           <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
@@ -80,6 +82,7 @@
         <div class="unit-stack"><label class="unit" for="in-eur">EUR</label><span class="unit-sub">euro</span></div>
         <input id="in-eur" data-key="eur" type="text" inputmode="decimal" placeholder="0"
                autocomplete="off" spellcheck="false" aria-label="Amount in euros" autofocus>
+        <span class="suffix" aria-hidden="true">€</span>
         <button class="copy-btn" data-key="eur" aria-label="Copy EUR amount" title="Copy">
           <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
@@ -89,6 +92,7 @@
         <div class="unit-stack"><label class="unit" for="in-usd">USD</label><span class="unit-sub">dollar</span></div>
         <input id="in-usd" data-key="usd" type="text" inputmode="decimal" placeholder="0"
                autocomplete="off" spellcheck="false" aria-label="Amount in US dollars">
+        <span class="suffix" aria-hidden="true">$</span>
         <button class="copy-btn" data-key="usd" aria-label="Copy USD amount" title="Copy">
           <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
           <svg class="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
@@ -104,7 +108,7 @@
       <button class="preset" data-eur="1000">1 000 €</button>
     </section>
 
-    <footer>CoinGecko data · auto-refresh every 2 min</footer>
+    <footer>Data provided by <button id="cgLink" class="linklike">CoinGecko</button> · refreshes every minute</footer>
   </main>
 
 <script src="main.js" defer></script>

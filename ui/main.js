@@ -15,7 +15,7 @@
   /* ── Config ────────────────────────────────────────────────────── */
 
   const SATS = 100_000_000;
-  const REFRESH_MS = 120_000;          // price auto-refresh
+  const REFRESH_MS = 60_000;           // price auto-refresh
   const SPARK_MAX_AGE = 600;           // seconds between sparkline refetches
   const PRICE_URL =
     'https://api.coingecko.com/api/v3/simple/price' +
@@ -350,6 +350,14 @@
     $('pinBtn').classList.toggle('active', P.pin);
     store.set('pin', P.pin);
     if (appWindow) { try { await appWindow.setAlwaysOnTop(P.pin); } catch { /* revert on failure */ } }
+  });
+
+  /* CoinGecko attribution link (free API tier requires a visible,
+     hyperlinked attribution). */
+  $('cgLink').addEventListener('click', () => {
+    const url = 'https://www.coingecko.com/en/api';
+    if (tauri && tauri.opener) tauri.opener.openUrl(url).catch(() => {});
+    else window.open(url, '_blank');
   });
 
   document.addEventListener('keydown', (e) => {

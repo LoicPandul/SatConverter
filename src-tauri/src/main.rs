@@ -35,6 +35,8 @@ fn main() {
                 .with_state_flags(StateFlags::POSITION)
                 .build(),
         )
+        // Opens the CoinGecko attribution link in the default browser.
+        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![copy_text])
         .run(tauri::generate_context!())
         .expect("failed to run SatConverter");

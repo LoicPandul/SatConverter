@@ -54,3 +54,12 @@ Development log for the Rust + Tauri port of SatConverter.
 - CI (GitHub Actions) building the release exe + NSIS installer per tag.
 - Configurable fiat pairs beyond EUR/USD.
 - Linux/macOS builds (the code is portable; only tested on Windows so far).
+
+## 2026-07-09 — v1.0.1 polish
+
+- Crisp rounded icons (per-size resize + sharpen from the 1254 px source).
+- SATS/BTC units in brand orange; neutral source rail; currency symbols (satsymbol, B, EUR, USD) right of each value.
+- CoinGecko free-tier attribution made compliant: prominent hyperlinked "Data provided by CoinGecko" in the footer (opener plugin, URL-scoped permission) + README credit.
+- Auto-refresh 2 min -> 1 min.
+- Simplified README; rounded logo + screenshot.
+- Full E2E regression re-run on release: ALL PASS. Binary 3.24 MB.

@@ -203,7 +203,7 @@ main {
 .rows { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
 
 .row {
-  display: grid; grid-template-columns: 72px 1fr 36px;
+  display: grid; grid-template-columns: 72px 1fr 18px 36px;
   align-items: center; gap: 8px;
   height: 56px; padding: 0 10px 0 14px;
   background: var(--panel);
@@ -214,12 +214,20 @@ main {
 }
 .row::before {
   content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px;
-  border-radius: 0 3px 3px 0; background: var(--accent);
+  border-radius: 0 3px 3px 0; background: rgba(233, 231, 226, .85);
   opacity: 0; transition: opacity .2s;
 }
 .row:focus-within { border-color: #2C313D; background: var(--panel-2); }
 .row.source::before { opacity: 1; }
-.row.source .unit { color: var(--accent); }
+/* Bitcoin units carry the brand accent; fiat stays neutral. */
+.row[data-key="sats"] .unit, .row[data-key="btc"] .unit { color: var(--accent); }
+
+.suffix {
+  color: var(--faint);
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.suffix svg { width: 14px; height: 14px; }
 
 .unit-stack { display: flex; flex-direction: column; gap: 2px; }
 .unit {
@@ -271,6 +279,12 @@ footer {
   font-size: 9.5px; letter-spacing: .06em; color: var(--faint);
   position: relative; z-index: 1;
 }
+.linklike {
+  font-size: inherit; letter-spacing: inherit; color: var(--muted);
+  text-decoration: underline; text-underline-offset: 2px;
+  transition: color .15s;
+}
+.linklike:hover { color: var(--accent); }
 
 /* ── Launch reveal ──────────────────────────────────────────────── */
 @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
