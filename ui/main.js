@@ -326,13 +326,7 @@
       if (v === null) return;
       try { await copyToClipboard(rawValue(key, v)); } catch { return; }
       btn.classList.add('done');
-      btn.querySelector('.ic-copy').style.display = 'none';
-      btn.querySelector('.ic-check').style.display = 'block';
-      setTimeout(() => {
-        btn.classList.remove('done');
-        btn.querySelector('.ic-copy').style.display = 'block';
-        btn.querySelector('.ic-check').style.display = 'none';
-      }, 900);
+      setTimeout(() => btn.classList.remove('done'), 900);
     });
   });
 

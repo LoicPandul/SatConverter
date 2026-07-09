@@ -77,6 +77,9 @@ button {
 button:focus-visible, input:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px;
 }
+/* Row inputs already get a strong focus treatment from the row itself
+   (rail + border + background) — the default outline would double it. */
+.row input:focus-visible { outline: none; }
 
 svg { display: block; }
 
@@ -245,6 +248,10 @@ main {
 .copy-btn:hover { background: var(--accent-dim); color: var(--accent); }
 .copy-btn svg { width: 14px; height: 14px; }
 .copy-btn.done { color: var(--up); background: var(--up-dim); }
+/* Icon swap driven by the .done class (strict CSP: no inline styles). */
+.copy-btn .ic-check { display: none; }
+.copy-btn.done .ic-copy { display: none; }
+.copy-btn.done .ic-check { display: block; }
 
 /* ── Presets ────────────────────────────────────────────────────── */
 .presets { display: flex; gap: 6px; flex-shrink: 0; }
