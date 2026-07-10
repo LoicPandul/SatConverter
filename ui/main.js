@@ -81,6 +81,27 @@
     set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* full/blocked: non-fatal */ } },
   };
 
+  /* ── Theme (dark by default, user choice persisted) ────────────── */
+
+  function applyTheme(theme) {
+    const light = theme === 'light';
+    if (light) document.documentElement.setAttribute('data-theme', 'light');
+    else document.documentElement.removeAttribute('data-theme');
+    const btn = $('themeBtn');
+    btn.setAttribute('aria-checked', String(light));
+    btn.setAttribute('aria-label', light ? 'Dark mode' : 'Light mode');
+    btn.title = light ? 'Switch to dark mode' : 'Switch to light mode';
+  }
+
+  let theme = store.get('theme') === 'light' ? 'light' : 'dark';
+  applyTheme(theme); // deferred script: runs before first paint, no flash
+
+  $('themeBtn').addEventListener('click', () => {
+    theme = theme === 'light' ? 'dark' : 'light';
+    store.set('theme', theme);
+    applyTheme(theme);
+  });
+
   /* ── Conversion ────────────────────────────────────────────────── */
 
   function fitFont(input) {

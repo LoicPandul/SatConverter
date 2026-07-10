@@ -18,24 +18,51 @@
 }
 
 :root {
-  --bg:         #0B0C0F;
-  --panel:      #12141A;
-  --panel-2:    #171A21;
-  --line:       #21252E;
-  --line-soft:  #1A1D24;
-  --txt:        #E9E7E2;
-  --muted:      #8E939D;
-  --faint:      #7A8090;
-  --accent:     #FC5B02;
-  --accent-dim: rgba(252, 91, 2, .13);
-  --up:         #3DDC97;
-  --up-dim:     rgba(61, 220, 151, .12);
-  --down:       #FF6B6B;
-  --down-dim:   rgba(255, 107, 107, .12);
+  --bg:          #0B0C0F;
+  --panel:       #12141A;
+  --panel-2:     #171A21;
+  --line:        #21252E;
+  --line-soft:   #1A1D24;
+  --line-focus:  #2C313D;
+  --txt:         #E9E7E2;
+  --muted:       #8E939D;
+  --faint:       #7A8090;
+  --placeholder: #3A3F4A;
+  --accent:      #FC5B02;
+  --accent-dim:  rgba(252, 91, 2, .13);
+  --up:          #3DDC97;
+  --up-dim:      rgba(61, 220, 151, .12);
+  --down:        #FF6B6B;
+  --down-dim:    rgba(255, 107, 107, .12);
+  --shadow-card: none;
+  --shadow-thumb: 0 1px 3px rgba(0, 0, 0, .35);
   --mono: 'Spline Sans Mono', 'Cascadia Mono', Consolas, monospace;
   --disp: 'Unbounded', 'Bahnschrift', 'Segoe UI', sans-serif;
   --r-lg: 16px;
   --r-md: 12px;
+}
+
+/* Light theme — same bones, depth from shadows instead of borders.
+   Accent darkened for WCAG contrast on paper; vivid orange stays on graphics. */
+:root[data-theme="light"] {
+  --bg:          #F3F1EC;
+  --panel:       #FFFFFF;
+  --panel-2:     #FAF8F4;
+  --line:        #E5E1D8;
+  --line-soft:   #ECE9E1;
+  --line-focus:  #CFCBC0;
+  --txt:         #1C1D22;
+  --muted:       #5D6068;
+  --faint:       #8B8E95;
+  --placeholder: #C2C4CA;
+  --accent:      #C74802;
+  --accent-dim:  rgba(252, 91, 2, .12);
+  --up:          #0B7350;
+  --up-dim:      rgba(16, 158, 110, .13);
+  --down:        #D63030;
+  --down-dim:    rgba(217, 45, 45, .11);
+  --shadow-card: 0 1px 2px rgba(28, 24, 16, .05), 0 6px 20px rgba(28, 24, 16, .07);
+  --shadow-thumb: 0 1px 3px rgba(28, 24, 16, .18);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -52,6 +79,8 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  /* Theme switches ease instead of jumping (abrupt brightness changes jar) */
+  transition: background-color .3s ease, color .3s ease;
 }
 
 ::selection { background: rgba(252, 91, 2, .35); }
@@ -130,6 +159,8 @@ main {
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  transition: border-color .3s ease, box-shadow .3s ease;
 }
 
 /* ── Hero: live price ───────────────────────────────────────────── */
@@ -219,7 +250,7 @@ main {
   position: relative;
   transition: border-color .2s, background .2s;
 }
-.row:focus-within { border-color: #2C313D; background: var(--panel-2); }
+.row:focus-within { border-color: var(--line-focus); background: var(--panel-2); }
 /* Bitcoin units carry the brand accent; fiat stays neutral. */
 .row[data-key="sats"] .unit, .row[data-key="btc"] .unit { color: var(--accent); }
 
@@ -245,7 +276,7 @@ main {
   font-variant-numeric: tabular-nums;
   user-select: text; cursor: text; min-width: 0;
 }
-.row input::placeholder { color: #3A3F4A; }
+.row input::placeholder { color: var(--placeholder); }
 .row input.small { font-size: 14px; }
 .row input.tiny  { font-size: 12px; }
 
@@ -266,8 +297,50 @@ main {
 .copy-btn.done .ic-copy { display: none; }
 .copy-btn.done .ic-check { display: block; animation: pop-in .16s cubic-bezier(.22, 1, .36, 1); }
 
-footer {
+/* ── Theme switch (sun / moon) ──────────────────────────────────── */
+.theme-switch {
   margin-top: auto;
+  display: flex; justify-content: center;
+  padding: 6px 0 2px;
+  position: relative; z-index: 1;
+}
+.switch {
+  position: relative;
+  width: 76px; height: 34px;
+  border-radius: 99px;
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-card);
+  transition: background .3s ease, border-color .2s, transform .1s ease-out;
+}
+.switch:hover { border-color: var(--line-focus); }
+.switch:active { transform: scale(.96); transition-duration: .3s, .2s, .04s; }
+.switch-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-thumb);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), background .3s ease, border-color .3s ease;
+}
+:root[data-theme="light"] .switch-thumb { transform: translateX(42px); background: #FFFFFF; }
+.switch-icon {
+  position: absolute; top: 50%; margin-top: -7.5px;
+  width: 15px; height: 15px;
+  color: var(--faint);
+  z-index: 1; /* icons ride above the thumb in both states */
+  transition: color .25s ease, opacity .25s ease, transform .3s cubic-bezier(.22, 1, .36, 1);
+}
+.switch-icon svg { width: 15px; height: 15px; }
+.icon-moon { left: 9px; }
+.icon-sun  { right: 9px; transform: rotate(40deg) scale(.88); opacity: .7; }
+/* Active icon: accent color, settled pose; inactive recedes */
+:root:not([data-theme="light"]) .icon-moon { color: var(--accent); }
+:root[data-theme="light"] .icon-sun { color: var(--accent); transform: rotate(0) scale(1); opacity: 1; }
+:root[data-theme="light"] .icon-moon { transform: rotate(-25deg) scale(.88); opacity: .7; }
+
+footer {
+  margin-top: 0;
   padding: 8px 0 9px;
   text-align: center;
   font-size: 9.5px; letter-spacing: .06em; color: var(--faint);
@@ -282,23 +355,27 @@ footer {
 
 /* ── Launch reveal ──────────────────────────────────────────────── */
 @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
-.hero, .row, footer { animation: rise .45s cubic-bezier(.22, 1, .36, 1) backwards; }
+.hero, .row, .theme-switch, footer { animation: rise .45s cubic-bezier(.22, 1, .36, 1) backwards; }
 .row:nth-child(1) { animation-delay: .06s; }
 .row:nth-child(2) { animation-delay: .11s; }
 .row:nth-child(3) { animation-delay: .16s; }
 .row:nth-child(4) { animation-delay: .21s; }
-footer  { animation-delay: .27s; }
+.theme-switch { animation-delay: .27s; }
+footer  { animation-delay: .32s; }
 
 /* Reduced motion ≠ no feedback: keep short cross-fades and color changes,
    drop movement (translate/scale) and looping pulses. */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .hero, .row, footer { animation: fade-in .2s ease backwards; }
+  .hero, .row, .theme-switch, footer { animation: fade-in .2s ease backwards; }
   .hero-price.bump,
   .dot.live, .dot.busy,
   .refresh-btn.spin svg,
   .copy-btn.done .ic-check { animation: none !important; }
   .win-btn, .refresh-btn, .copy-btn { transition: background .15s, color .15s; }
-  .win-btn:active, .refresh-btn:active, .copy-btn:active { transform: none; }
+  .win-btn:active, .refresh-btn:active, .copy-btn:active, .switch:active { transform: none; }
   #spark, .prog { transition: none; }
+  /* Thumb snaps instead of gliding; icons still cross-fade */
+  .switch-thumb { transition: background .2s ease; }
+  .switch-icon { transition: color .2s ease, opacity .2s ease; }
 }

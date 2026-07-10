@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/screenshot.png" alt="SatConverter screenshot" width="380">
+  <img src="assets/screenshot.png" alt="SatConverter — dark and light themes" width="720">
 </p>
 
 ## Download
@@ -28,6 +28,7 @@ Grab the latest installer from the [Releases](https://github.com/LoicPandul/SatC
 - Type in any field — the three others update instantly
 - Live price, 24h change and sparkline, refreshed every minute
 - One-click copy, always-on-top pin
+- Dark & light themes (sun/moon switch, choice persisted)
 - Works offline with the last known price
 - Remembers its window position · single instance
 - Number formats follow your system locale

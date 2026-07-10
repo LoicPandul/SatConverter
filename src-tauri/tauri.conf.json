@@ -16,7 +16,7 @@
         "label": "main",
         "title": "SatConverter",
         "width": 424,
-        "height": 600,
+        "height": 640,
         "resizable": false,
         "fullscreen": false,
         "decorations": false,
