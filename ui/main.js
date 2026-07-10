@@ -284,7 +284,7 @@
     if (!fetching) renderStatus();
     if (nextAt) {
       const frac = 1 - Math.max(0, nextAt - Date.now()) / REFRESH_MS;
-      $('prog').style.width = (frac * 100).toFixed(1) + '%';
+      $('prog').style.transform = 'scaleX(' + frac.toFixed(3) + ')';
       if (Date.now() >= nextAt) doRefresh();
     }
   }, 1000);
@@ -325,8 +325,12 @@
       const v = parseNum(inputs[key].value);
       if (v === null) return;
       try { await copyToClipboard(rawValue(key, v)); } catch { return; }
+      // Restart feedback cleanly on rapid re-copy (no stacked timers).
+      btn.classList.remove('done');
+      void btn.offsetWidth;
       btn.classList.add('done');
-      setTimeout(() => btn.classList.remove('done'), 900);
+      clearTimeout(btn._doneTimer);
+      btn._doneTimer = setTimeout(() => btn.classList.remove('done'), 900);
     });
   });
 

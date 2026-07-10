@@ -110,9 +110,12 @@ svg { display: block; }
 .win-btn {
   width: 34px; height: 30px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: var(--muted); transition: background .15s, color .15s;
+  color: var(--muted);
+  transition: background .15s, color .15s, transform .1s ease-out;
 }
 .win-btn:hover { background: var(--panel-2); color: var(--txt); }
+/* Feedback on press, not on release (Apple: response — kill latency) */
+.win-btn:active { transform: scale(.92); transition-duration: .15s, .15s, .04s; }
 .win-btn.close:hover { background: rgba(255, 107, 107, .15); color: var(--down); }
 .win-btn.pin.active { color: var(--accent); background: var(--accent-dim); }
 
@@ -186,17 +189,21 @@ main {
 .refresh-btn {
   width: 28px; height: 28px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: var(--muted); transition: background .15s, color .15s;
+  color: var(--muted);
+  transition: background .15s, color .15s, transform .1s ease-out;
 }
 .refresh-btn:hover { background: var(--accent-dim); color: var(--accent); }
+.refresh-btn:active { transform: scale(.9); transition-duration: .15s, .15s, .04s; }
 .refresh-btn svg { width: 13px; height: 13px; }
 .refresh-btn.spin svg { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* scaleX + transform-origin: compositor-friendly (never animate width) */
 .prog {
-  position: absolute; left: 0; bottom: 0; height: 2px; width: 0%;
+  position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
   background: linear-gradient(90deg, transparent, rgba(252, 91, 2, .55));
-  transition: width 1s linear;
+  transform: scaleX(0); transform-origin: 0 50%;
+  transition: transform 1s linear;
 }
 
 /* ── Converter rows ─────────────────────────────────────────────── */
@@ -245,15 +252,19 @@ main {
 .copy-btn {
   width: 32px; height: 32px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: var(--faint); transition: background .15s, color .15s;
+  color: var(--faint);
+  transition: background .15s, color .15s, transform .1s ease-out;
 }
 .copy-btn:hover { background: var(--accent-dim); color: var(--accent); }
+.copy-btn:active { transform: scale(.9); transition-duration: .15s, .15s, .04s; }
 .copy-btn svg { width: 14px; height: 14px; }
 .copy-btn.done { color: var(--up); background: var(--up-dim); }
-/* Icon swap driven by the .done class (strict CSP: no inline styles). */
+/* Icon swap driven by the .done class (strict CSP: no inline styles).
+   Check pops in crisply — no overshoot: nothing here carried momentum. */
+@keyframes pop-in { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .copy-btn .ic-check { display: none; }
 .copy-btn.done .ic-copy { display: none; }
-.copy-btn.done .ic-check { display: block; }
+.copy-btn.done .ic-check { display: block; animation: pop-in .16s cubic-bezier(.22, 1, .36, 1); }
 
 footer {
   margin-top: auto;
@@ -267,7 +278,7 @@ footer {
   text-decoration: underline; text-underline-offset: 2px;
   transition: color .15s;
 }
-.linklike:hover { color: var(--accent); }
+.linklike:hover, .linklike:active { color: var(--accent); }
 
 /* ── Launch reveal ──────────────────────────────────────────────── */
 @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
@@ -278,6 +289,16 @@ footer {
 .row:nth-child(4) { animation-delay: .21s; }
 footer  { animation-delay: .27s; }
 
+/* Reduced motion ≠ no feedback: keep short cross-fades and color changes,
+   drop movement (translate/scale) and looping pulses. */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .hero, .row, footer { animation: fade-in .2s ease backwards; }
+  .hero-price.bump,
+  .dot.live, .dot.busy,
+  .refresh-btn.spin svg,
+  .copy-btn.done .ic-check { animation: none !important; }
+  .win-btn, .refresh-btn, .copy-btn { transition: background .15s, color .15s; }
+  .win-btn:active, .refresh-btn:active, .copy-btn:active { transform: none; }
+  #spark, .prog { transition: none; }
 }
