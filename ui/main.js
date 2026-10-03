@@ -363,7 +363,7 @@
     H.state = state;
     H.rates = r;
     // While fetching, the previous figures stay on screen, dimmed.
-    $('hero').classList.toggle('pending', state === 'loading' && !!r);
+    document.body.classList.toggle('pending', state === 'loading' && !!r);
     afterRates(state === 'ok');
   }
 
@@ -417,7 +417,7 @@
       histAt.focus();
     } else {
       cancelHistory();
-      $('hero').classList.remove('pending');
+      document.body.classList.remove('pending');
       afterRates(false);
     }
   }
@@ -429,8 +429,11 @@
 
   // Typing a date fires `input` on every segment (and passes through
   // years like 0002 → 0020 → 0202): wait for a pause before fetching.
+  // Meanwhile the figures on screen belong to the previous date: mark
+  // them stale and drop any fetch still in flight for it.
   histAt.addEventListener('input', () => {
-    clearTimeout(H.timer);
+    cancelHistory();
+    setHistory('loading', H.rates);
     H.timer = setTimeout(loadHistory, 400);
   });
   histAt.addEventListener('focus', () => { histAt.max = SatHistory.toLocalValue(Date.now()); });
@@ -479,6 +482,8 @@
   document.querySelectorAll('.copy-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const key = btn.dataset.key;
+      // A converted figure is stale while another date's price loads.
+      if (H.on && H.state === 'loading' && key !== source) return;
       const v = parseNum(inputs[key].value);
       if (v === null) return;
       try { await copyToClipboard(rawValue(key, v)); } catch { return; }

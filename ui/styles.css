@@ -247,8 +247,9 @@ body:not(.hist) .hist-only, body.hist .live-only { display: none; }
 
 /* Fetching a past price: the previous figures stay, dimmed, until the
    new ones land (no flash of empty values while typing a date). */
-.hero-price, .hero-sub { transition: opacity .2s ease; }
-.hero.pending .hero-price, .hero.pending .hero-sub { opacity: .4; }
+.hero-price, .hero-sub, .row input { transition: opacity .2s ease; }
+body.pending .hero-price, body.pending .hero-sub,
+body.pending .row:not(.source) input { opacity: .4; }
 
 .hero-status {
   display: flex; align-items: center; gap: 7px;
