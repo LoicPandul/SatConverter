@@ -29,7 +29,7 @@
   const P = { eur: null, usd: null, change24: null, spark: [], ts: null, pin: false };
   /* Historical mode: prices at a past minute (Bitstamp). `rates` is
      { eur, usd } once loaded; `state` drives the status line. */
-  const H = { on: false, at: null, rates: null, state: 'idle', req: 0, ctrl: null, timer: null };
+  const H = { on: false, at: null, rates: null, state: 'incomplete', req: 0, ctrl: null, timer: null };
   let source = null;        // field currently being edited
   let fetching = false;
   let offline = false;
@@ -246,13 +246,11 @@
     return new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  const fmtWhen = (ms) =>
-    new Date(ms).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  const fmtWhen = new Intl.DateTimeFormat([], { dateStyle: 'medium', timeStyle: 'short' });
 
   /* Historical states other than 'ok': [dot class, message]. The message
      sits right under the date field (its aria-describedby). */
   const HIST_STATUS = {
-    idle:       ['dot', ''],
     loading:    ['dot busy', 'fetching price…'],
     incomplete: ['dot', 'enter a full date and time'],
     early:      ['dot err', 'prices start on ' +
@@ -274,7 +272,7 @@
     const busy = H.on ? H.state === 'loading' : fetching;
     $('refreshBtn').classList.toggle('spin', busy);
     if (H.on) {
-      if (H.state === 'ok') setStatus('dot hist', 'Bitstamp · ' + fmtWhen(H.at));
+      if (H.state === 'ok') setStatus('dot hist', 'Bitstamp · ' + fmtWhen.format(H.at));
       else setStatus(...HIST_STATUS[H.state]);
     } else if (fetching) {
       setStatus('dot busy', 'updating…');
@@ -339,7 +337,7 @@
 
       renderPrice(!H.on); // historical mode: only the "since" chip moves
       renderSpark();
-      afterPrices();
+      if (!H.on) afterPrices();
     } catch {
       offline = true;
       if (H.on) renderPrice(false); // the "since" chip loses today's price
@@ -353,6 +351,7 @@
   /* ── Historical mode ───────────────────────────────────────────── */
 
   const histAt = $('histAt');
+  histAt.min = SatHistory.MIN_VALUE;
   const histCache = SatHistory.createCache(store, 'histPrices');
 
   /* Re-render everything that depends on the active prices. */
