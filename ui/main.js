@@ -27,6 +27,9 @@
   /* ── State ─────────────────────────────────────────────────────── */
 
   const P = { eur: null, usd: null, change24: null, spark: [], ts: null, pin: false };
+  /* Historical mode: prices at a past minute (Bitstamp). `rates` is
+     { eur, usd } once loaded; `state` drives the status line. */
+  const H = { on: false, at: null, rates: null, state: 'idle', req: 0, ctrl: null, timer: null };
   let source = null;        // field currently being edited
   let fetching = false;
   let offline = false;
@@ -132,53 +135,76 @@
     return KEYS.every((k) => inputs[k].value.trim() === '');
   }
 
+  /* Prices the converter uses right now: live, or the chosen past minute. */
+  function rates() {
+    if (H.on) return H.rates;
+    return P.eur && P.usd ? P : null;
+  }
+
   function recompute(fromKey) {
     const raw = inputs[fromKey].value;
     if (raw.trim() === '') { clearAll(); return; }
 
     const v = parseNum(raw);
-    if (v === null || !P.eur || !P.usd) return;
+    if (v === null) return;
+    const r = rates();
+    if (!r) {
+      // No price for the chosen date: never leave figures from another one.
+      KEYS.forEach((k) => { if (k !== fromKey) setField(k, ''); });
+      return;
+    }
 
     let btc;
     if (fromKey === 'sats') btc = v / SATS;
     else if (fromKey === 'btc') btc = v;
-    else if (fromKey === 'eur') btc = v / P.eur;
-    else btc = v / P.usd;
+    else if (fromKey === 'eur') btc = v / r.eur;
+    else btc = v / r.usd;
 
     if (fromKey !== 'sats') setField('sats', fmt.sats(btc * SATS));
     if (fromKey !== 'btc') setField('btc', fmt.btc(btc));
-    if (fromKey !== 'eur') setField('eur', fmt.eur(btc * P.eur));
-    if (fromKey !== 'usd') setField('usd', fmt.usd(btc * P.usd));
+    if (fromKey !== 'eur') setField('eur', fmt.eur(btc * r.eur));
+    if (fromKey !== 'usd') setField('usd', fmt.usd(btc * r.usd));
   }
 
   /* ── Hero rendering ────────────────────────────────────────────── */
 
+  /* Hero shows whichever prices the converter uses: live, or the past
+     minute in historical mode (where the chip compares it with today). */
   function renderPrice(animate) {
-    if (!P.eur) return;
+    const r = rates();
     const el = $('priceUsd');
     el.innerHTML = '';
-    el.append(fmt.usd(P.usd));
+    el.append(r ? fmt.usd(r.usd) : '—');
     const cur = document.createElement('span');
     cur.className = 'cur';
     cur.textContent = '$';
     el.append(cur);
-    $('priceEur').textContent = fmt.eur(P.eur) + ' €';
-    if (animate) {
+    $('priceEur').textContent = r ? fmt.eur(r.eur) + ' €' : '—';
+    if (animate && r) {
       el.classList.remove('bump');
       void el.offsetWidth;
       el.classList.add('bump');
     }
 
+    if (H.on) renderChip(r && P.usd ? (P.usd / r.usd - 1) * 100 : null, 'since');
+    else renderChip(P.change24, '/ 24h');
+    $('chip24').title = H.on ? 'Change from that date to now, in USD' : '';
+  }
+
+  function renderChip(pct, suffix) {
     const chip = $('chip24');
-    if (P.change24 !== null && P.change24 !== undefined) {
-      const up = P.change24 >= 0;
-      chip.className = 'chip ' + (up ? 'up' : 'down');
-      chip.innerHTML =
-        (up
-          ? '<svg viewBox="0 0 10 10"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg>'
-          : '<svg viewBox="0 0 10 10"><path d="M5 8.5 1 2h8z" fill="currentColor"/></svg>') +
-        (up ? '+' : '−') + fmtPct1.format(Math.abs(P.change24)) + '% / 24h';
+    if (pct === null || pct === undefined || !Number.isFinite(pct)) {
+      chip.className = 'chip';
+      chip.textContent = '— ' + suffix;
+      return;
     }
+    const up = pct >= 0;
+    chip.className = 'chip ' + (up ? 'up' : 'down');
+    chip.innerHTML =
+      (up
+        ? '<svg viewBox="0 0 10 10"><path d="M5 1.5 9 8H1z" fill="currentColor"/></svg>'
+        : '<svg viewBox="0 0 10 10"><path d="M5 8.5 1 2h8z" fill="currentColor"/></svg>') +
+      (up ? '+' : '−') + fmtPct1.format(Math.abs(pct)) + '% ' + suffix;
   }
 
   function renderSpark() {
@@ -218,21 +244,44 @@
     return new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  function renderStatus() {
+  const fmtWhen = (ms) =>
+    new Date(ms).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+
+  /* Historical states other than 'ok': [dot class, message]. The message
+     sits right under the date field (its aria-describedby). */
+  const HIST_STATUS = {
+    idle:       ['dot', ''],
+    loading:    ['dot busy', 'fetching price…'],
+    incomplete: ['dot', 'enter a full date and time'],
+    early:      ['dot err', 'prices start on ' +
+                 new Date(SatHistory.parseLocal(SatHistory.MIN_VALUE)).toLocaleDateString([], { dateStyle: 'medium' })],
+    future:     ['dot err', 'pick a time in the past'],
+    missing:    ['dot err', 'no Bitstamp price for that minute'],
+    error:      ['dot err', "can't reach Bitstamp · Ctrl+R to retry"],
+  };
+
+  function setStatus(dotClass, text) {
     const dot = $('dot');
     const txt = $('statusTxt');
-    if (fetching) {
-      dot.className = 'dot busy';
-      txt.textContent = 'updating…';
+    dot.className = dotClass;
+    // Rewrite only on change: the line is a polite live region.
+    if (txt.textContent !== text) txt.textContent = text;
+  }
+
+  function renderStatus() {
+    const busy = H.on ? H.state === 'loading' : fetching;
+    $('refreshBtn').classList.toggle('spin', busy);
+    if (H.on) {
+      if (H.state === 'ok') setStatus('dot hist', 'Bitstamp · ' + fmtWhen(H.at));
+      else setStatus(...HIST_STATUS[H.state]);
+    } else if (fetching) {
+      setStatus('dot busy', 'updating…');
     } else if (offline) {
-      dot.className = 'dot err';
-      txt.textContent = P.ts ? 'offline · last price ' + timeOf(P.ts) : 'offline · no data';
+      setStatus('dot err', P.ts ? 'offline · last price ' + timeOf(P.ts) : 'offline · no data');
     } else if (P.ts) {
-      dot.className = 'dot live';
-      txt.textContent = 'live · ' + agoText();
+      setStatus('dot live', 'live · ' + agoText());
     } else {
-      dot.className = 'dot';
-      txt.textContent = 'loading…';
+      setStatus('dot', 'loading…');
     }
   }
 
@@ -261,7 +310,6 @@
     if (fetching) return;
     fetching = true;
     renderStatus();
-    $('refreshBtn').classList.add('spin');
 
     try {
       const data = await fetchJson(PRICE_URL);
@@ -287,7 +335,7 @@
         } catch { /* keep previous sparkline */ }
       }
 
-      renderPrice(true);
+      renderPrice(!H.on); // historical mode: only the "since" chip moves
       renderSpark();
       afterPrices();
     } catch {
@@ -295,10 +343,98 @@
     } finally {
       fetching = false;
       nextAt = Date.now() + REFRESH_MS;
-      $('refreshBtn').classList.remove('spin');
       renderStatus();
     }
   }
+
+  /* ── Historical mode ───────────────────────────────────────────── */
+
+  const histAt = $('histAt');
+  const histCache = SatHistory.createCache(store, 'histPrices');
+
+  /* Re-render everything that depends on the active prices. */
+  function afterRates(animate) {
+    renderPrice(animate);
+    renderStatus();
+    if (source) recompute(source);
+  }
+
+  function setHistory(state, r) {
+    H.state = state;
+    H.rates = r;
+    // While fetching, the previous figures stay on screen, dimmed.
+    $('hero').classList.toggle('pending', state === 'loading' && !!r);
+    afterRates(state === 'ok');
+  }
+
+  function cancelHistory() {
+    clearTimeout(H.timer);
+    H.req++;
+    if (H.ctrl) { H.ctrl.abort(); H.ctrl = null; }
+  }
+
+  async function loadHistory() {
+    cancelHistory();
+    const now = Date.now();
+    histAt.max = SatHistory.toLocalValue(now);
+    const ms = SatHistory.parseLocal(histAt.value);
+    $('histTz').textContent = SatHistory.utcOffsetLabel(ms === null ? now : ms);
+    const why = SatHistory.check(ms, now);
+    if (why) { setHistory(why, null); return; }
+
+    H.at = ms;
+    store.set('histAt', histAt.value);
+    const minute = SatHistory.minuteOf(ms);
+    const hit = histCache.get(minute);
+    if (hit) { setHistory('ok', hit); return; }
+
+    const id = H.req;
+    const ctrl = new AbortController();
+    H.ctrl = ctrl;
+    const timeout = setTimeout(() => ctrl.abort(), 10_000);
+    setHistory('loading', H.rates);
+    try {
+      const r = await SatHistory.fetchRates(minute, { signal: ctrl.signal });
+      if (id !== H.req) return; // superseded by a newer date or a mode switch
+      if (r) histCache.set(minute, r);
+      setHistory(r ? 'ok' : 'missing', r);
+    } catch {
+      if (id === H.req) setHistory('error', null);
+    } finally {
+      clearTimeout(timeout);
+      if (H.ctrl === ctrl) H.ctrl = null;
+    }
+  }
+
+  function setMode(on) {
+    H.on = on;
+    document.body.classList.toggle('hist', on);
+    $('histBtn').setAttribute('aria-pressed', String(on));
+    if (on) {
+      // Last date used, else this time yesterday.
+      if (!histAt.value) histAt.value = store.get('histAt') || SatHistory.toLocalValue(Date.now() - 86_400_000);
+      loadHistory();
+      histAt.focus();
+    } else {
+      cancelHistory();
+      $('hero').classList.remove('pending');
+      afterRates(false);
+    }
+  }
+
+  function refresh() {
+    if (H.on) loadHistory();
+    else doRefresh();
+  }
+
+  // Typing a date fires `input` on every segment (and passes through
+  // years like 0002 → 0020 → 0202): wait for a pause before fetching.
+  histAt.addEventListener('input', () => {
+    clearTimeout(H.timer);
+    H.timer = setTimeout(loadHistory, 400);
+  });
+  histAt.addEventListener('focus', () => { histAt.max = SatHistory.toLocalValue(Date.now()); });
+  $('histBtn').addEventListener('click', () => setMode(!H.on));
 
   /* 1s tick: relative time, progress bar, auto-refresh. */
   setInterval(() => {
@@ -357,7 +493,7 @@
 
   /* ── Window controls & shortcuts ───────────────────────────────── */
 
-  $('refreshBtn').addEventListener('click', doRefresh);
+  $('refreshBtn').addEventListener('click', refresh);
   $('minBtn').addEventListener('click', () => appWindow && appWindow.minimize());
   $('closeBtn').addEventListener('click', () => appWindow && appWindow.close());
   $('pinBtn').addEventListener('click', async () => {
@@ -369,17 +505,18 @@
 
   /* CoinGecko attribution link (free API tier requires a visible,
      hyperlinked attribution). */
-  $('cgLink').addEventListener('click', () => {
+  document.querySelectorAll('.cg-link').forEach((link) => link.addEventListener('click', () => {
     const url = 'https://www.coingecko.com/en/api';
     if (tauri && tauri.opener) tauri.opener.openUrl(url).catch(() => {});
     else window.open(url, '_blank');
-  });
+  }));
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { clearAll(); inputs.eur.focus(); }
+    // Escape inside the date field belongs to the field (closes its picker).
+    if (e.key === 'Escape' && e.target !== histAt) { clearAll(); inputs.eur.focus(); }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
       e.preventDefault();
-      doRefresh();
+      refresh();
     }
   });
 
