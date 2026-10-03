@@ -9,7 +9,7 @@
   "app": {
     "withGlobalTauri": true,
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' https://api.coingecko.com; img-src 'self' data:; font-src 'self'; style-src 'self'"
+      "csp": "default-src 'self'; connect-src 'self' https://api.coingecko.com https://www.bitstamp.net; img-src 'self' data:; font-src 'self'; style-src 'self'"
     },
     "windows": [
       {

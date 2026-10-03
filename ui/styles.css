@@ -40,6 +40,7 @@
   --disp: 'Unbounded', 'Bahnschrift', 'Segoe UI', sans-serif;
   --r-lg: 16px;
   --r-md: 12px;
+  color-scheme: dark; /* native form controls (the date field icon) match the theme */
 }
 
 /* Light theme — same bones, depth from shadows instead of borders.
@@ -63,6 +64,7 @@
   --down-dim:    rgba(217, 45, 45, .11);
   --shadow-card: 0 1px 2px rgba(28, 24, 16, .05), 0 6px 20px rgba(28, 24, 16, .07);
   --shadow-thumb: 0 1px 3px rgba(28, 24, 16, .18);
+  color-scheme: light;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -146,7 +148,8 @@ svg { display: block; }
 /* Feedback on press, not on release (Apple: response — kill latency) */
 .win-btn:active { transform: scale(.92); transition-duration: .15s, .15s, .04s; }
 .win-btn.close:hover { background: rgba(255, 107, 107, .15); color: var(--down); }
-.win-btn.pin.active { color: var(--accent); background: var(--accent-dim); }
+.win-btn.pin.active,
+.win-btn.hist[aria-pressed="true"] { color: var(--accent); background: var(--accent-dim); }
 
 /* ── Main layout ────────────────────────────────────────────────── */
 main {
@@ -196,9 +199,57 @@ main {
 }
 .hero-price.bump { animation: bump .45s ease-out; }
 
-.spark-wrap { margin: 10px -16px 0; height: 46px; position: relative; }
+/* One slot, two occupants: the sparkline (live) or the date row
+   (historical). Stacked in a single grid cell so switching never
+   shifts the layout. */
+.slot { display: grid; margin: 10px -16px 0; }
+.slot > * { grid-area: 1 / 1; }
+.spark-wrap { height: 46px; position: relative; transition: opacity .25s ease; }
 #spark { width: 100%; height: 46px; opacity: 1; transition: opacity .4s; }
 #spark.fade { opacity: 0; }
+
+/* Date row: a recessed readout window, same anatomy as a converter row. */
+.when {
+  align-self: center;
+  margin: 0 16px;
+  height: 40px; padding: 0 6px 0 12px;
+  display: grid; grid-template-columns: 60px 1fr; align-items: center; gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  opacity: 0; visibility: hidden;
+  transition: opacity .25s ease, visibility 0s linear .25s, border-color .2s;
+}
+.when:focus-within { border-color: var(--line-focus); }
+.when .unit { color: var(--accent); }
+.when input {
+  width: 100%; min-width: 0;
+  background: none; border: none; color: var(--txt);
+  font-family: var(--mono); font-size: 14px; font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.when input:focus-visible { outline: none; } /* the row's border carries focus */
+.when input::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+/* The focused segment keeps the system highlight: Chromium ignores
+   author styles there. */
+.when input::-webkit-calendar-picker-indicator {
+  margin-left: 6px; padding: 5px; border-radius: 7px;
+  cursor: pointer; opacity: .6;
+  transition: opacity .15s, background-color .15s;
+}
+.when input::-webkit-calendar-picker-indicator:hover { opacity: 1; background-color: var(--accent-dim); }
+
+body.hist .when { opacity: 1; visibility: visible; transition-delay: 0s; }
+body.hist .spark-wrap { opacity: 0; pointer-events: none; } /* stacked above the date row */
+body.hist .prog { opacity: 0; }
+body:not(.hist) .hist-only, body.hist .live-only { display: none; }
+
+/* Fetching a past price: the previous figures stay, dimmed, until the
+   new ones land (no flash of empty values while typing a date). */
+.hero-price, .hero-sub, .row input { transition: opacity .2s ease; }
+body.pending .hero-price, body.pending .hero-sub,
+body.pending .row:not(.source) input { opacity: .4; }
 
 .hero-status {
   display: flex; align-items: center; gap: 7px;
@@ -213,6 +264,8 @@ main {
 .dot.live { background: var(--up); box-shadow: 0 0 6px rgba(61, 220, 151, .7); animation: pulse 2.4s infinite; }
 .dot.busy { background: var(--accent); animation: pulse .9s infinite; }
 .dot.err  { background: var(--down); box-shadow: 0 0 6px rgba(255, 107, 107, .7); }
+/* Historical price: a hollow ring, still — time is frozen, not live. */
+.dot.hist { background: none; box-shadow: inset 0 0 0 1.5px var(--accent); }
 @keyframes pulse { 50% { opacity: .35; } }
 
 #statusTxt { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -375,6 +428,7 @@ footer  { animation-delay: .32s; }
   .win-btn, .refresh-btn, .copy-btn { transition: background .15s, color .15s; }
   .win-btn:active, .refresh-btn:active, .copy-btn:active, .switch:active { transform: none; }
   #spark, .prog { transition: none; }
+  .spark-wrap, .when { transition-duration: .15s; }
   /* Thumb snaps instead of gliding; icons still cross-fade */
   .switch-thumb { transition: background .2s ease; }
   .switch-icon { transition: color .2s ease, opacity .2s ease; }
