@@ -111,6 +111,12 @@ test('fetchRates rejects on HTTP errors', async () => {
   }), /HTTP 429/);
 });
 
+test('fetchRates rejects a 200 reply that is not an OHLC list', async () => {
+  await assert.rejects(H.fetchRates(1742049420, {
+    fetchFn: fakeFetch({ btceur: { status: 'error', reason: 'busy' }, btcusd: reply(1742049420, 84172, 1) }),
+  }), /unexpected reply/);
+});
+
 function memoryStore() {
   const data = {};
   return { data, get: (k) => (k in data ? JSON.parse(data[k]) : null), set: (k, v) => { data[k] = JSON.stringify(v); } };

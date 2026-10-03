@@ -76,12 +76,15 @@
   }
 
   /* { eur, usd } at that minute, or null when Bitstamp has no price close
-     enough. Rejects on network or HTTP errors (and on abort). */
+     enough. Rejects on network or HTTP errors, on a reply that isn't an
+     OHLC list (worth a retry, unlike an empty one) and on abort. */
   async function fetchRates(minute, { signal, fetchFn = (url, init) => fetch(url, init) } = {}) {
     const one = async (pair) => {
       const res = await fetchFn(ohlcUrl(pair, minute), { signal });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      return priceAt(await res.json(), minute);
+      const json = await res.json();
+      if (!(json && json.data && Array.isArray(json.data.ohlc))) throw new Error('unexpected reply');
+      return priceAt(json, minute);
     };
     const [eur, usd] = await Promise.all([one('btceur'), one('btcusd')]);
     return eur && usd ? { eur, usd } : null;
