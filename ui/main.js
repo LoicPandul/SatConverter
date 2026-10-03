@@ -186,7 +186,9 @@
       el.classList.add('bump');
     }
 
-    if (H.on) renderChip(r && P.usd ? (P.usd / r.usd - 1) * 100 : null, 'since');
+    // "since" needs today's price: not a cached or offline one.
+    const liveFresh = !offline && P.usd && P.ts && Date.now() / 1000 - P.ts < 2 * REFRESH_MS / 1000;
+    if (H.on) renderChip(r && liveFresh ? (P.usd / r.usd - 1) * 100 : null, 'since');
     else renderChip(P.change24, '/ 24h');
     $('chip24').title = H.on ? 'Change from that date to now, in USD' : '';
   }
@@ -340,6 +342,7 @@
       afterPrices();
     } catch {
       offline = true;
+      if (H.on) renderPrice(false); // the "since" chip loses today's price
     } finally {
       fetching = false;
       nextAt = Date.now() + REFRESH_MS;
