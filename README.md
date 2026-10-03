@@ -65,6 +65,7 @@ sha256sum --check SHA256SUMS --ignore-missing
 
 - Type in any field: the 3 others update instantly
 - Live price, 24h change and sparkline, refreshed every minute
+- Historical mode: pick any minute since 1 January 2017 and convert at that minute's price, with the change since then
 - Copy any value in a click, pin the window always on top
 - Dark and light themes, your choice is persisted
 - Works offline with the last known price
@@ -83,8 +84,14 @@ cargo build --release  # target/release/satconverter(.exe)
 
 The frontend (`ui/`) is plain HTML, CSS and JavaScript: no Node, no build step.
 
+The date and price logic of the historical mode has unit tests, run with [Node](https://nodejs.org/) 22 or later:
+
+```powershell
+node --test "tests/*.test.js"
+```
+
 ## License
 
 Released into the public domain under the [Unlicense](LICENSE).
 
-Price data provided by [CoinGecko](https://www.coingecko.com/en/api).
+Live prices provided by [CoinGecko](https://www.coingecko.com/en/api), historical prices by [Bitstamp](https://www.bitstamp.net/api/).
