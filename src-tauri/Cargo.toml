@@ -1,6 +1,6 @@
 [package]
 name = "satconverter"
-version = "0.1.0"
+version = "0.1.1"
 description = "A lightweight desktop converter for instant sats, BTC, EUR and USD conversions with live Bitcoin prices."
 authors = ["Loïc Morel"]
 license = "Unlicense"

@@ -40,7 +40,7 @@ Get `minisign.exe` from the [official releases](https://github.com/jedisct1/mini
 ```powershell
 minisign -Vm SHA256SUMS -P RWTz3c4gUmglCX5Uvjthigz1ts3TS3ZSdhRNpFgOJRW/Wr4XjGlqTR3O
 
-$file = "SatConverter_0.1.0_x64-setup.exe"   # the file you downloaded
+$file = "SatConverter_0.1.1_x64-setup.exe"   # the file you downloaded
 $hash = (Get-FileHash $file).Hash.ToLower()
 if (Select-String -Quiet -SimpleMatch "$hash  $file" SHA256SUMS) { "OK: $file matches" } else { "MISMATCH - do not run this file" }
 ```
