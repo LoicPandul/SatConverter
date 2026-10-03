@@ -421,6 +421,7 @@
       cancelHistory();
       document.body.classList.remove('pending');
       afterRates(false);
+      afterPrices(); // first-launch example, if it was skipped in historical mode
     }
   }
 
